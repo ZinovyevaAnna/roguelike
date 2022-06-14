@@ -84,7 +84,6 @@ class Menu(State):
         pass
 
     def display(self, stdscr):
-        safe(stdscr.clear)()
         for i in range(len(menu_options)):
             safe(stdscr.addstr)(i + 1, 1, ('> ' if self.selected == i else '') + menu_options[i])
 
@@ -157,7 +156,6 @@ class Game(State):
         return abs(self.me.x - i) + abs(self.me.y - j) < 6
 
     def display(self, stdscr):
-        stdscr.clear()
         for i in range(self.h):
             for j in range(self.w):
                 if self.is_visible(i, j):
@@ -174,7 +172,7 @@ class Game(State):
         safe(stdscr.refresh)()
 
     def save(self):
-        with open('.saved_version', 'w') as file:
+        with open('../.saved_version', 'w') as file:
             packed = {'level': self.level,
                       'me': self.me.__dict__,
                       'exit': self.exit.__dict__,
@@ -183,10 +181,10 @@ class Game(State):
             json.dump(packed, file)
 
     def load(self):
-        if not os.path.isfile('.saved_version'):
+        if not os.path.isfile('../.saved_version'):
             self.new_game()
             return
-        with open('.saved_version', 'r') as file:
+        with open('../.saved_version', 'r') as file:
             packed = json.load(file)
             self.level = packed['level']
             e = packed['me']
@@ -229,8 +227,12 @@ class App:
             result = self.get_state().act_on_enter()
         if key == 27:  # esc
             self.get_state().act_on_esc()
-        self.get_state().display(stdscr)
+        self.display(stdscr)
         return result
+
+    def display(self, stdscr):
+        stdscr.clear()
+        self.get_state().display(stdscr)
 
     @staticmethod
     def get():
@@ -253,7 +255,7 @@ def generate_maze(h, w):
     maze = [[1] * w for _ in range(h)]
     dfs(maze, 1, 1)
     for _ in range(h + w):
-        maze[random.randint(0, h - 1)][random.randint(0, w - 1)] = 0
+        maze[random.randint(1, h - 2)][random.randint(1, w - 2)] = 0
     return maze
 
 
